@@ -1,0 +1,29 @@
+joint1_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint1
+  # pid: {p: 500.0, i: 0.01, d: 10.0}
+
+joint2_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint2
+  # pid: {p: 1000.0, i: 0.1, d: 50.0}
+joint3_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint3
+  # pid: {p: 1000.0, i: 0.1, d: 50.0}
+joint4_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint4
+  # pid: {p: 1000.0, i: 0.1, d: 50.0}
+joint5_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint5
+  # pid: {p: 1000.0, i: 0.01, d: 10.0}
+joint6_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint6
+  # pid: {p: 1000.0, i: 0.01, d: 10.0}
+joint7_velocity_controller:
+  type: "velocity_controllers/JointVelocityController"
+  joint: panda_joint7
+  # pid: {p: 100.0, i: 0.01, d: 10.0}

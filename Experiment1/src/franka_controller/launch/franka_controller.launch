@@ -1,0 +1,4 @@
+<launch>
+	<node name="franka_kinematics_solver_node" pkg="franka_controller" type="franka_kinematics_solver_node" output="screen"/>
+	<node name="franka_joint_command_node" pkg="franka_controller" type="franka_joint_command_node" output="screen"/>
+</launch>

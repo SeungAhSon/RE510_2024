@@ -1,0 +1,11 @@
+<launch>
+
+	<param name="teleoperation_mode" type ="int" value="1"/>
+	<!-- 1=increments command, 2=rate control -->
+
+	<node name="master_controller_node" pkg="teleoperation" type="master_controller_node_EIH" output="screen"/>
+	<node name="slave_controller_node" pkg="teleoperation" type="slave_controller_node_EIH" output="screen"/>
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find teleoperation)/config/franka_teleoperation.rviz" />
+
+		
+</launch>

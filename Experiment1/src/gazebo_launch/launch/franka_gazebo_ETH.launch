@@ -1,0 +1,20 @@
+<launch>
+
+	<!-- World Upload-->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find gazebo_launch)/world/table_and_cans.world"/>
+	
+		<arg name="paused" value="true"/>
+	</include>
+	
+	<!-- Robot Upload -->
+
+	<!-- ETH -->
+	<include file="$(find franka_gazebo)/launch/panda_arm_hand_position_ETH.launch">
+		<arg name="robot_name" value="panda"/>
+		<arg name="robot_namespace" value="franka"/>
+	</include>
+
+	<include file="$(find kinect)/launch/kinect_gazebo_upload.launch"/>
+
+</launch>

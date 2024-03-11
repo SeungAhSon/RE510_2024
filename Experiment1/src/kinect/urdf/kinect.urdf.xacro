@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<robot name = "kinect" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find kinect)/urdf/kinect.gazebo.xacro" />
+
+  <link name="base"/>
+
+  <!--Camera-->
+    <!-- <joint name="base_camera_joint" type="fixed">
+      <axis xyz="0 0 0" />
+      <origin xyz="0.1 0 0" rpy="${3.1415} ${-3.1415/2} 0"/>
+      <parent link="base"/>
+      <child link="base_camera_link"/>
+    </joint> -->
+
+    <joint name="base_camera_joint" type="fixed">
+      <axis xyz="0 0 0" />
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="base"/>
+      <child link="base_camera_link"/>
+    </joint>
+
+    <link name="base_camera_link">
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+      <box size="0.1 0.1 0.1"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://kinect/meshes/kinect.dae"/>
+        </geometry>
+        <material name="red"/>
+      </visual>
+
+      <inertial>
+        <mass value="0.1" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+    <joint name="base_camera_depth_joint" type="fixed">
+      <axis xyz="0 0 1" />
+      <origin xyz="0 0 0" rpy="${-3.1415/2} 0 ${-3.1415/2}"/>
+      <parent link="base_camera_link"/>
+      <child link="base_camera_depth_link"/>
+    </joint>
+
+    <link name="base_camera_depth_link"/>
+</robot>

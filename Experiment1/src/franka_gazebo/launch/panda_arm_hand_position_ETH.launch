@@ -1,0 +1,48 @@
+<launch>
+
+	<arg name="robot_namespace" default="franka"/>
+	<arg name="robot_name" default="panda"/>
+  	<arg name="hardware_interface" default="PositionJointInterface"/>
+  	
+
+	<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find franka_gazebo)/robots/panda_arm_hand_ETH.urdf.xacro' 
+		robot_name:=$(arg robot_name)
+		hardware_interface:=$(arg hardware_interface)"
+		/>
+	
+	<!-- Spawning the robot -->
+	<node name="spawn" pkg="gazebo_ros" type="spawn_model" args="-param /robot_description -urdf -model $(arg robot_name)
+		-J panda_joint1 0.0
+		-J panda_joint2 -0.7
+		-J panda_joint3 0
+		-J panda_joint4 -1.8
+		-J panda_joint5 0
+		-J panda_joint6 1.1
+		-J panda_joint7 0.0"/>
+
+
+	<!-- Control Parameter loading -->
+	<rosparam command="load" file="$(find franka_gazebo)/config/joint_states.yaml" ns="$(arg robot_namespace)"/>
+	<rosparam command="load" file="$(find franka_gazebo)/config/joint_commands.yaml" ns="$(arg robot_namespace)"/>
+	<rosparam command="load" file="$(find franka_gazebo)/config/joint_commands_velocity.yaml" ns="$(arg robot_namespace)"/>
+	<rosparam command="load" file="$(find franka_gazebo)/config/gripper_commands.yaml" ns="$(arg robot_namespace)"/>
+
+	<!-- Robot Controller Spawning -->
+	<node name="franka_controller_spawner" pkg="controller_manager" type="spawner" ns="$(arg robot_namespace)" args=
+		"joint_state_controller
+		joint1_position_controller
+		joint2_position_controller
+		joint3_position_controller
+		joint4_position_controller
+		joint5_position_controller
+		joint6_position_controller
+		joint7_position_controller
+		">
+	</node>
+
+ 	<!-- convert joint states to TF transforms for rviz, etc -->
+   	<node pkg="robot_state_publisher" type="robot_state_publisher" name="rob_st_pub"> 
+  		<remap from="/joint_states" to="/$(arg robot_namespace)/joint_states"/>
+  	</node>
+
+</launch>

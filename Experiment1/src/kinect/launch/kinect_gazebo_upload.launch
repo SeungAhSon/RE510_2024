@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+
+  <param name="kinect_description"
+      command="$(find xacro)/xacro --inorder '$(find kinect)/urdf/kinect.urdf.xacro'" />
+
+	<!-- <node name="spawn_kinect_urdf" pkg="gazebo_ros" type="spawn_model" args="-param kinect_description -urdf -model kinect_sensor" /> -->
+
+  <node name="kinect_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
+    respawn="false" output="screen">
+    <remap from="/joint_states" to="/kinect/joint_states" />
+    <remap from="robot_description" to="kinect_description"/>
+  </node>
+  
+</launch>
