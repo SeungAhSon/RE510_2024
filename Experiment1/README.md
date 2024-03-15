@@ -5,6 +5,9 @@
 Learn the basic concept of the manipulator teleoperation.
 Implement a simple teleoperation system for the 7-DoF manipulator.
 
+
+<img src="./img1.png" width="300px" height="150px" title="Gazebo"></img>
+<img src="./img2.png" width="300px" height="150px" title="Rviz"></img>
 ---
 ### Experiment details and scoring 
 
