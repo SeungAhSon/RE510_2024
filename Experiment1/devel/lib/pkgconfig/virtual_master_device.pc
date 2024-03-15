@@ -1,0 +1,8 @@
+prefix=/home/sa/RE510_2024/Experiment1/devel
+
+Name: virtual_master_device
+Description: Description of virtual_master_device
+Version: 0.0.0
+Cflags: -I/home/sa/RE510_2024/Experiment1/devel/include
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy std_msgs tf message_runtime

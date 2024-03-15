@@ -1,0 +1,8 @@
+prefix=/home/sa/RE510_2024/Experiment1/install
+
+Name: franka_gazebo
+Description: Description of franka_gazebo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

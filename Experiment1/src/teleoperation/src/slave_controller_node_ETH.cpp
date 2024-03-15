@@ -125,6 +125,34 @@ public:
 
             // Implement your controller
 
+						double k = 0.8;
+						Eigen::Vector3d movement_vector(master_cmd.pose.position.x,
+                                master_cmd.pose.position.y,
+                                master_cmd.pose.position.z);
+
+						Eigen::Vector3d rotated_vector =  R_BaseToCam_ * movement_vector * k;
+
+
+						target_pose_.pose.position.x += rotated_vector.x();
+						target_pose_.pose.position.y += rotated_vector.y();
+						target_pose_.pose.position.z += rotated_vector.z();
+
+            tf::Quaternion origin_orientation;
+            tf::quaternionMsgToTF(target_pose_.pose.orientation, origin_orientation);
+
+
+            tf::Quaternion add_orientation;
+            tf::quaternionMsgToTF(master_cmd.pose.orientation, add_orientation);
+            
+            
+            tf::Quaternion rotation_difference = origin_orientation * add_orientation * k;
+						rotation_difference.normalize();
+            
+            target_pose_.pose.orientation.x = rotation_difference.getX();
+            target_pose_.pose.orientation.y = rotation_difference.getY();
+            target_pose_.pose.orientation.z = rotation_difference.getZ();
+            target_pose_.pose.orientation.w = rotation_difference.getW();
+
             // Update Desired End-effector Pose to the 'target_pose_' variable.
 
         }
@@ -133,7 +161,34 @@ public:
         else if(teleoperation_mode_ == 2){
 
             // Implement your controller
+						double k = 0.01;
+						double k2 = 0.1;
+						Eigen::Vector3d movement_vector(master_cmd.pose.position.x,
+                                master_cmd.pose.position.y,
+                                master_cmd.pose.position.z);
 
+						Eigen::Vector3d rotated_vector =  R_BaseToCam_ * movement_vector * k;
+
+
+						target_pose_.pose.position.x += rotated_vector.x();
+						target_pose_.pose.position.y += rotated_vector.y();
+						target_pose_.pose.position.z += rotated_vector.z();
+
+						tf::Quaternion origin_orientation;
+						tf::quaternionMsgToTF(target_pose_.pose.orientation, origin_orientation);
+
+						tf::Quaternion add_orientation;
+						tf::quaternionMsgToTF(master_cmd.pose.orientation, add_orientation);
+						add_orientation.setX(add_orientation.getX() * k2);
+						add_orientation.setY(add_orientation.getY() * k2);
+						add_orientation.setZ(add_orientation.getZ() * k2);
+						
+						tf::Quaternion rotation_difference = origin_orientation * add_orientation;
+						
+						target_pose_.pose.orientation.x = rotation_difference.getX();
+						target_pose_.pose.orientation.y = rotation_difference.getY();
+						target_pose_.pose.orientation.z = rotation_difference.getZ();
+						target_pose_.pose.orientation.w = rotation_difference.getW();
             // Update Desired End-effector Pose to the 'target_pose_' variable.
 
         }

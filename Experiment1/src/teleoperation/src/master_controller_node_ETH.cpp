@@ -64,30 +64,38 @@ public:
             // Make your increments command
 
             // Translation
-            master_command.pose.position.x = 0.0; // replace '0.0' to your command value
-            master_command.pose.position.y = 0.0; // replace '0.0' to your command value
-            master_command.pose.position.z = 0.0; // replace '0.0' to your command value
+            master_command.pose.position.x = lowpass_filter(master_command.pose.position.x, m_pz - old_msg.pos.pose.position.z);
+            master_command.pose.position.y = lowpass_filter(master_command.pose.position.y, m_px - old_msg.pos.pose.position.x);
+            master_command.pose.position.z = lowpass_filter(master_command.pose.position.z, m_py - old_msg.pos.pose.position.y);
+
 
             // Orientation
-            master_command.pose.orientation.x = 0.0; // replace value to your command value
-            master_command.pose.orientation.y = 0.0; // replace value to your command value
-            master_command.pose.orientation.z = 0.0; // replace value to your command value
-            master_command.pose.orientation.w = 1.0; // replace value to your command value
+            tf::Quaternion m_rot_orientation;
+            tf::quaternionMsgToTF(msg->pos.pose.orientation, m_rot_orientation);
+            tf::Quaternion old_m_rot_orientation;
+            tf::quaternionMsgToTF(old_msg.pos.pose.orientation, old_m_rot_orientation);
+            
+            tf::Quaternion rotation_difference = m_rot_orientation * old_m_rot_orientation.inverse();
+
+            master_command.pose.orientation.x = lowpass_filter(master_command.pose.orientation.x, rotation_difference.getX());
+            master_command.pose.orientation.y = lowpass_filter(master_command.pose.orientation.y, rotation_difference.getZ());
+            master_command.pose.orientation.z = lowpass_filter(master_command.pose.orientation.z, -rotation_difference.getY());
+            master_command.pose.orientation.w = lowpass_filter(master_command.pose.orientation.w, rotation_difference.getW());
         }
 
         // 2.Position to Velocity : publish the position command
         else if(teleoperation_mode_ == 2){
 
             // Translation
-            master_command.pose.position.x = 0.0; // replace '0.0' to your command value
-            master_command.pose.position.y = 0.0; // replace '0.0' to your command value
-            master_command.pose.position.z = 0.0; // replace '0.0' to your command value
+            master_command.pose.position.x = lowpass_filter(master_command.pose.position.x, m_pz);
+            master_command.pose.position.y = lowpass_filter(master_command.pose.position.y, m_px);
+            master_command.pose.position.z = lowpass_filter(master_command.pose.position.z, m_py);
 
             // Orientation
-            master_command.pose.orientation.x = 0.0; // replace value to your command value
-            master_command.pose.orientation.y = 0.0; // replace value to your command value
-            master_command.pose.orientation.z = 0.0; // replace value to your command value
-            master_command.pose.orientation.w = 1.0; // replace value to your command value
+            master_command.pose.orientation.x = lowpass_filter(master_command.pose.orientation.x, m_rot.x());
+            master_command.pose.orientation.y = lowpass_filter(master_command.pose.orientation.y, m_rot.z());
+            master_command.pose.orientation.z = lowpass_filter(master_command.pose.orientation.z, -m_rot.y());
+            master_command.pose.orientation.w = lowpass_filter(master_command.pose.orientation.w, m_rot.w());
         }
 
 

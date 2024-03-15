@@ -80,11 +80,22 @@ public:
 
 
         //--- Implement your code here ---//  implement inverse kinematics by using included functions in this c++ class
-        
+        KDL::Frame target_frame;
+        PoseStampedMsgToKDLFrame(target_ee_pose_, target_frame);
+
+        KDL::JntArray q_out(q_current.rows());
+        int ik_result = KDLInverseKinematics(franka_chain_, target_frame, q_current, q_out);
+
+        if (ik_result >= 0) {
+            std::cout <<"Y : Found a solution." << "\n";
+            KDLJntArrayToJointStateMsg(q_out, desired_joint_state);
+        }else {
+            std::cout <<"N : Inverse kinematics failed to find a solution." << "\n";
+            KDLJntArrayToJointStateMsg(q_current, desired_joint_state);
+        }
         
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+        /////////////////////////////////roslaunch franka_controller franka_controller.launch
 
         // Publish final joint state.
         sensor_msgs::JointState final_joint_state; // Including finger joints

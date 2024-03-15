@@ -1,0 +1,8 @@
+prefix=/home/sa/RE510_2024/Experiment1/install
+
+Name: gazebo_launch
+Description: Description of gazebo_launch
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

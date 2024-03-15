@@ -1,0 +1,2 @@
+franka_controller:franka_gazebo:gazebo_launch:kinect:teleoperation:virtual_master_device
+-DCATKIN_DEVEL_PREFIX=/home/sa/RE510_2024/Experiment1/devel -DCMAKE_INSTALL_PREFIX=/home/sa/RE510_2024/Experiment1/install -G Unix Makefiles
