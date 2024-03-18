@@ -1,0 +1,7 @@
+<launch>
+    <group ns="ns1">
+        <node pkg="ros_tutorials" type="number_generator_node"  name="number_generator_node" output="screen" />
+        <node pkg="ros_tutorials" type="game_logic_node" name="game_logic_node"     output="screen" />
+        <node pkg="ros_tutorials" type="game_output_node" name="game_output_node"       output="screen" />
+    </group>
+</launch>
