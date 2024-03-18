@@ -3,6 +3,7 @@
 # Title : Introduction to ROS
 
 Learn the basic concept of the Multi node communication in ROS.
+
 Implement a 3-6-9 game with three nodes.
 
 ---
@@ -30,3 +31,8 @@ After changing code, run
 catkin_make
 
 source devel/setup.bash
+
+---
+
+### Submission
+Your final submission including source codes(package), videos, and report(.pdf) should be submitted by March 24th.
