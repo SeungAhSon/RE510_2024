@@ -37,6 +37,13 @@ master_controller_node.cpp (EIH, ETH)
 slave_controller_node.cpp (EIH, ETH)
 franka_kinematics_solver.cpp
 
+
+After changing code, run
+
+catkin_make
+
+source devel/setup.bash
+
 ---
 #### Running simulation systems (EIH Config.)
 Launch Gazebo Simulator
