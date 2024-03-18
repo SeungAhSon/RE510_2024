@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
   ros::Rate loop_rate(1);  
 
   ros_tutorials::Counts msg;
-  int count = 1;
+  int count = 0;
   while (ros::ok()) {
     msg.stamp = ros::Time::now();
     msg.data = count;
