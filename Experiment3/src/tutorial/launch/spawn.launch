@@ -1,0 +1,18 @@
+<launch>
+    <!-- Run Gazebo -->
+    <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include> -->
+    <!-- Load the model into the ROS Parameter Server -->
+    <param name="robot_description"
+        command="$(find xacro)/xacro --inorder '$(find tutorial)/model/model.xacro'" />
+
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a robot -->
+    <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -model simple_model -param robot_description"/>
+
+</launch>
