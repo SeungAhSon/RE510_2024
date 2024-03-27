@@ -22,3 +22,9 @@ gazebo window. Capturing rqt, rviz, and terminal window is an option.
 make a simple lidar with T shaped machine
 
 <img src="./img1.png" width="300px" height="150px" title="Gazebo"></img>
+
+### class 2 - Build a simple machine by Gazebo GUI
+
+make a car with camera and lidar sensor on top of it
+
+<img src="./img2.png" width="300px" height="150px" title="Gazebo"></img>
