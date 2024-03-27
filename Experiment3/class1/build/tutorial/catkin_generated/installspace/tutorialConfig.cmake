@@ -67,14 +67,14 @@ set(tutorial_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(tutorial_SOURCE_PREFIX /home/sa/RE510_2024/Experiment3/src/tutorial)
-  set(tutorial_DEVEL_PREFIX /home/sa/RE510_2024/Experiment3/devel)
+  set(tutorial_SOURCE_PREFIX /home/sa/RE510_2024/Experiment3/class1/src/tutorial)
+  set(tutorial_DEVEL_PREFIX /home/sa/RE510_2024/Experiment3/class1/devel)
   set(tutorial_INSTALL_PREFIX "")
   set(tutorial_PREFIX ${tutorial_DEVEL_PREFIX})
 else()
   set(tutorial_SOURCE_PREFIX "")
   set(tutorial_DEVEL_PREFIX "")
-  set(tutorial_INSTALL_PREFIX /home/sa/RE510_2024/Experiment3/install)
+  set(tutorial_INSTALL_PREFIX /home/sa/RE510_2024/Experiment3/class1/install)
   set(tutorial_PREFIX ${tutorial_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/sa/RE510_2024/Experiment3/install/lib;/home/sa/catkin_ws/devel/lib;/opt/ros/noetic/lib)
+    foreach(path /home/sa/RE510_2024/Experiment3/class1/install/lib;/home/sa/RE510_2024/Experiment3/class1/devel/lib;/home/sa/catkin_ws/devel/lib;/opt/ros/noetic/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

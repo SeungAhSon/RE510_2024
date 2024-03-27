@@ -1,8 +1,8 @@
-# Install script for directory: /home/sa/RE510_2024/Experiment3/src/tutorial
+# Install script for directory: /home/sa/RE510_2024/Experiment3/class1/src/tutorial
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/sa/RE510_2024/Experiment3/install")
+  set(CMAKE_INSTALL_PREFIX "/home/sa/RE510_2024/Experiment3/class1/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,21 +38,17 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/sa/RE510_2024/Experiment3/build/tutorial/catkin_generated/installspace/tutorial.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/sa/RE510_2024/Experiment3/class1/build/tutorial/catkin_generated/installspace/tutorial.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial/cmake" TYPE FILE FILES
-    "/home/sa/RE510_2024/Experiment3/build/tutorial/catkin_generated/installspace/tutorialConfig.cmake"
-    "/home/sa/RE510_2024/Experiment3/build/tutorial/catkin_generated/installspace/tutorialConfig-version.cmake"
+    "/home/sa/RE510_2024/Experiment3/class1/build/tutorial/catkin_generated/installspace/tutorialConfig.cmake"
+    "/home/sa/RE510_2024/Experiment3/class1/build/tutorial/catkin_generated/installspace/tutorialConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial" TYPE FILE FILES "/home/sa/RE510_2024/Experiment3/src/tutorial/package.xml")
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial/launch" TYPE DIRECTORY FILES "/home/sa/RE510_2024/Experiment3/src/tutorial/launch/" REGEX "/\\.svn$" EXCLUDE)
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/tutorial" TYPE FILE FILES "/home/sa/RE510_2024/Experiment3/class1/src/tutorial/package.xml")
 endif()
 

@@ -1,4 +1,4 @@
-prefix=/home/sa/RE510_2024/Experiment3/devel
+prefix=/home/sa/RE510_2024/Experiment3/class1/devel
 
 Name: tutorial
 Description: Description of tutorial

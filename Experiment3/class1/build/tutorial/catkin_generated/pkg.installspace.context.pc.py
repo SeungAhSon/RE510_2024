@@ -4,5 +4,5 @@ PROJECT_PKG_CONFIG_INCLUDE_DIRS = "".split(';') if "" != "" else []
 PROJECT_CATKIN_DEPENDS = "".replace(';', ' ')
 PKG_CONFIG_LIBRARIES_WITH_PREFIX = "".split(';') if "" != "" else []
 PROJECT_NAME = "tutorial"
-PROJECT_SPACE_DIR = "/home/sa/RE510_2024/Experiment3/install"
+PROJECT_SPACE_DIR = "/home/sa/RE510_2024/Experiment3/class1/install"
 PROJECT_VERSION = "0.0.0"

@@ -1,2 +1,2 @@
 tutorial
--DCATKIN_DEVEL_PREFIX=/home/sa/RE510_2024/Experiment3/devel -DCMAKE_INSTALL_PREFIX=/home/sa/RE510_2024/Experiment3/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/sa/RE510_2024/Experiment3/class1/devel -DCMAKE_INSTALL_PREFIX=/home/sa/RE510_2024/Experiment3/class1/install -G Unix Makefiles
