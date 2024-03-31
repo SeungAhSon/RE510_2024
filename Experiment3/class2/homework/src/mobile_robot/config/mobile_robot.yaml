@@ -1,0 +1,19 @@
+joint_state_controller:
+  type: "joint_state_controller/JointStateController"
+  publish_rate: 50
+
+right_front_arm_controller:
+  type: "position_controllers/JointPositionController"
+  joint: front_right_wheel_joint
+
+right_back_arm_controller:
+  type: "position_controllers/JJointPositionController"
+  joint: rear_right_wheel_joint
+
+left_front_arm_controller:
+  type: "position_controllers/JointPositionController"
+  joint: front_left_wheel_joint
+
+left_back_arm_controller:
+  type: "position_controllers/JointPositionController"
+  joint: rear_left_wheel_joint
