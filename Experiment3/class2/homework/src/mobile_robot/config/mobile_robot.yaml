@@ -7,7 +7,7 @@ right_front_arm_controller:
   joint: front_right_wheel_joint
 
 right_back_arm_controller:
-  type: "position_controllers/JJointPositionController"
+  type: "position_controllers/JointPositionController"
   joint: rear_right_wheel_joint
 
 left_front_arm_controller:
