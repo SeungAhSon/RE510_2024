@@ -6,13 +6,32 @@ import icp
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
     
+def plot_g2o(optimizer):
+    poses = []
+    for vertex_id, vertex in optimizer.vertices().items():
+        pose = vertex.estimate()
+        translation = pose.translation()
+        poses.append((translation[0], translation[1]))  # Get x and y positions
+
+    x, y = zip(*poses)
+
+    # Plotting
+    plt.figure(figsize=(8, 8))
+    plt.quiver(x[:-1], y[:-1], np.diff(x), np.diff(y), scale_units='xy', angles='xy', scale=1, color='blue')  
+    plt.plot(x, y, '-', markersize=5)  # 'bo-' for blue circle markers connected by lines
+    plt.xlabel('X position')
+    plt.ylabel('Y position')
+    plt.title('Graph Optimization Results with g2opy')
+    plt.grid(True)
+    plt.show()
+    return
+
 def main():
     ############################################
     #                                          #
     #          DATA PROCESSING PART            #
     #                                          #
     ############################################
-    
     # READ POSE DATA FROM CSV. posedata = [pose0,poes1,...]
     # pose0 = numpy matrix 4x4 (SE3)
     posedata = []
@@ -63,8 +82,8 @@ def main():
         # POSE BEFORE : LAST NODE'S POSE ( nodes[-1][0] )  #
         # POSE NOW    : CURRENT POSE     ( posedata[i]  )  #
         ####################################################
-        poseDiff =  ???#Calculate pose diff in 4x4 matrix #HW
-        distDiff =  ???#Calculate euclidean distance between two node (using posediff)
+        poseDiff =  np.linalg.inv(nodes[-1][0]).dot(posedata[i]) #Calculate pose diff in 4x4 matrix
+        distDiff =  np.linalg.norm(poseDiff[0:3, 3]) #Calculate euclidean distance between two node (using posediff)
         yawDiff  = R.from_dcm(poseDiff[0:3,0:3]).as_euler('zyx')[0] # Robot is in 2D in this lab, so just use Yaw angle
         # If enough distance(0.1[m]) or angle(30[deg]) difference, create node
         if (distDiff > 0.1 or abs(yawDiff)/3.141592*180 > 30):
@@ -90,12 +109,12 @@ def main():
     optimizer = PoseGraphOptimization();
     
     #Add first node as a fixed vertex. (True = fixed, False = non-fixed)
-    optimizer.add_vertex(???, g2o.Isometry3d(???),True)
+    optimizer.add_vertex(0, g2o.Isometry3d(nodes[0][0]), True)
     
     for i in range(1,len(nodes)):
-        optimizer.add_vertex(???)
-        optimizer.add_edge([???,???],g2o.Isometry3d(???),
-                           information=???)
+        optimizer.add_vertex(i, g2o.Isometry3d(nodes[i][0]), False)
+        optimizer.add_edge([i-1,i],g2o.Isometry3d(nodes[i][2]),
+                           information=np.eye(6))
 
     #############################################################################
     #                                                                           #
@@ -113,6 +132,8 @@ def main():
 
     optimizer.save_g2o('beforeSLAM.g2o')
     
+    
+    plot_g2o(optimizer)
     #############################################################################
     # ASSIGNMENTS 3 : FIND LOOP CLOSURE                                         #
     #                                                                           #
@@ -123,7 +144,11 @@ def main():
 
     # matchingPair = [[src0,dst0],[src1,dst2]...]
     matchingPair = []
-
+    distance_threshold = 1  # Spatial threshold
+    for i in range(len(nodes)):
+        for j in range(i+1, len(nodes)):
+            if np.linalg.norm(nodes[i][0][0:3, 3] - nodes[j][0][0:3, 3]) < distance_threshold:
+                matchingPair.append([i, j])
     
     
     #####################################################################################
@@ -140,6 +165,7 @@ def main():
             
             
     for src,dst in matchingPair:
+        print(src,dst)
         srcLiDAR = nodes[src][1][0:4];
         dstLiDAR = nodes[dst][1][0:4];
 	    #GET SOURCE NODE POSITION (FROM VERTEX). srcRT = 4x4 matrix
@@ -153,7 +179,7 @@ def main():
 
         #PROCESS POINT CLOUD!
         srcPoint = srcLiDAR
-        dstPoint = ?
+        dstPoint = dstLiDAR
 
         #DON'T HAVE TO CHANGE MATCHING FUNCTION
         T, distances, iterations = icp.icp(dstPoint[0:2].T,srcPoint[0:2].T,
@@ -165,16 +191,18 @@ def main():
 		#DRAWING FUNCTION FOR CHECKING ICP DONE WELL : Source blue, Dest green, Dest after ICP red
 		
         #dstTrans = np.dot(T, dstPoint)
-        #plt.scatter(dstPoint[0], dstPoint[1], c='g', marker='o',s=0.2)
-        #plt.scatter(srcPoint[0], srcPoint[1], c='b', marker='o',s=0.2)
-        #plt.scatter(dstTrans[0], dstTrans[1], c='r', marker='o',s=0.2)
-		#plt.show()
+        #plt.scatter(dstPoint[0], dstPoint[1], c='g', marker='o',s=0.2, label="Dest")
+        #plt.scatter(srcPoint[0], srcPoint[1], c='b', marker='o',s=0.2, label="Source")
+        #plt.scatter(dstTrans[0], dstTrans[1], c='r', marker='o',s=0.2, label="ICP")
+        #plt.legend(loc='upper right', markerscale=3)
+        #plt.show()
 		
-        if(?):	# ADD CONDITION OF MATCHING SUCCESS (ex: mean of distances less then 0.05 [m])
-            optimizer.add_edge([???,???], g2o.Isometry3d(???),
-                           information=???)
+        if np.mean(distances) < 0.05:	# ADD CONDITION OF MATCHING SUCCESS (ex: mean of distances less then 0.05 [m])
+            optimizer.add_edge([src, dst], g2o.Isometry3d(T),
+                           information=np.eye(6))
             optimizer.optimize()
 
+    
 
     #############################################################################
     #                                                                           #
@@ -194,6 +222,7 @@ def main():
     plt.show()
     
     optimizer.save_g2o('afterSLAM.g2o')
+    plot_g2o(optimizer)
 
 
 
