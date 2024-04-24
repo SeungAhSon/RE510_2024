@@ -6,7 +6,7 @@ import icp
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
     
-def plot_g2o(optimizer):
+def plot_g2o(optimizer, showedge = False):
     poses = []
     for vertex_id, vertex in optimizer.vertices().items():
         pose = vertex.estimate()
@@ -19,12 +19,28 @@ def plot_g2o(optimizer):
     plt.figure(figsize=(8, 8))
     plt.quiver(x[:-1], y[:-1], np.diff(x), np.diff(y), scale_units='xy', angles='xy', scale=1, color='blue')  
     plt.plot(x, y, '-', markersize=5)  # 'bo-' for blue circle markers connected by lines
+    
+    if showedge:
+        for edge in optimizer.edges():
+            v1, v2 = edge.vertices()
+            x = np.array([v1.estimate().translation()[0], v2.estimate().translation()[0]])
+            y = np.array([v1.estimate().translation()[1], v2.estimate().translation()[1]])
+            plt.plot(x, y, '-k', alpha=0.5)
     plt.xlabel('X position')
     plt.ylabel('Y position')
     plt.title('Graph Optimization Results with g2opy')
     plt.grid(True)
     plt.show()
     return
+
+def calculate_information_matrix(dist_diff, yaw_diff):
+    information_matrix = np.eye(6)
+    
+    information_matrix[0, 0] = dist_diff  # Update x covariance based on distance difference
+    information_matrix[1, 1] = dist_diff  # Update y covariance based on distance difference
+    information_matrix[5, 5] = yaw_diff   # Update yaw covariance based on yaw difference
+    
+    return information_matrix
 
 def main():
     ############################################
@@ -86,6 +102,8 @@ def main():
         distDiff =  np.linalg.norm(poseDiff[0:3, 3]) #Calculate euclidean distance between two node (using posediff)
         yawDiff  = R.from_dcm(poseDiff[0:3,0:3]).as_euler('zyx')[0] # Robot is in 2D in this lab, so just use Yaw angle
         # If enough distance(0.1[m]) or angle(30[deg]) difference, create node
+        
+        information_matrix = calculate_information_matrix(distDiff, yawDiff)
         if (distDiff > 0.1 or abs(yawDiff)/3.141592*180 > 30):
             nodes.append([posedata[i],lidardata[i],poseDiff])
 
@@ -114,7 +132,7 @@ def main():
     for i in range(1,len(nodes)):
         optimizer.add_vertex(i, g2o.Isometry3d(nodes[i][0]), False)
         optimizer.add_edge([i-1,i],g2o.Isometry3d(nodes[i][2]),
-                           information=np.eye(6))
+                           information=information_matrix)
 
     #############################################################################
     #                                                                           #
@@ -142,15 +160,6 @@ def main():
     #                                                                           #
     #############################################################################  
 
-    # matchingPair = [[src0,dst0],[src1,dst2]...]
-    matchingPair = []
-    distance_threshold = 1  # Spatial threshold
-    for i in range(len(nodes)):
-        for j in range(i+1, len(nodes)):
-            if np.linalg.norm(nodes[i][0][0:3, 3] - nodes[j][0][0:3, 3]) < distance_threshold:
-                matchingPair.append([i, j])
-    
-    
     #####################################################################################
     # ASSIGNMENTS 4 : MATCHING PAIRS, OPTIMIZE!                                         #
     #                                                                                   #
@@ -163,44 +172,50 @@ def main():
     #											                                        #
     #####################################################################################         
             
-            
-    for src,dst in matchingPair:
-        print(src,dst)
-        srcLiDAR = nodes[src][1][0:4];
-        dstLiDAR = nodes[dst][1][0:4];
-	    #GET SOURCE NODE POSITION (FROM VERTEX). srcRT = 4x4 matrix
-        rt = optimizer.get_pose(src)
-        srcRT = np.insert(rt.R, 3, rt.t, axis=1)
-        srcRT = np.insert(srcRT, 3, [0, 0, 0, 1], axis=0)
-	    #GET DESTINATION NODE POSITION (FROM VERTEX). dstRT = 4x4 matrix
-        rt = optimizer.get_pose(dst)
-        dstRT = np.insert(rt.R, 3, rt.t, axis=1)
-        dstRT = np.insert(dstRT, 3, [0, 0, 0, 1], axis=0)
+    # matchingPair = [[src0,dst0],[src1,dst2]...]
+    matchingPair = []
+    distance_threshold = 1  # Spatial threshold
+    for src in range(len(nodes)):
+        for dst in range(src+1, len(nodes)):
+            if np.linalg.norm(nodes[src][0][0:3, 3] - nodes[dst][0][0:3, 3]) < distance_threshold:
+                print(src, dst)
+                matchingPair.append([src, dst])
+                
+                srcLiDAR = nodes[src][1][0:4];
+                dstLiDAR = nodes[dst][1][0:4];
+                #GET SOURCE NODE POSITION (FROM VERTEX). srcRT = 4x4 matrix
+                rt = optimizer.get_pose(src)
+                srcRT = np.insert(rt.R, 3, rt.t, axis=1)
+                srcRT = np.insert(srcRT, 3, [0, 0, 0, 1], axis=0)
+                #GET DESTINATION NODE POSITION (FROM VERTEX). dstRT = 4x4 matrix
+                rt = optimizer.get_pose(dst)
+                dstRT = np.insert(rt.R, 3, rt.t, axis=1)
+                dstRT = np.insert(dstRT, 3, [0, 0, 0, 1], axis=0)
 
-        #PROCESS POINT CLOUD!
-        srcPoint = srcLiDAR
-        dstPoint = dstLiDAR
+                #PROCESS POINT CLOUD!
+                srcPoint = srcLiDAR
+                dstPoint = dstLiDAR
 
-        #DON'T HAVE TO CHANGE MATCHING FUNCTION
-        T, distances, iterations = icp.icp(dstPoint[0:2].T,srcPoint[0:2].T,
-                                               tolerance=0.000001,max_iterations=100)
-        #### MAKE 3x3 matrix into 4x4 matrix ####
-        T = np.insert(T, 2, [0, 0, 0], axis=1)
-        T = np.insert(T, 2, [0, 0, 1, 0], axis=0)
+                #DON'T HAVE TO CHANGE MATCHING FUNCTION
+                T, distances, iterations = icp.icp(dstPoint[0:2].T,srcPoint[0:2].T,
+                                                    tolerance=0.000001,max_iterations=100)
+                #### MAKE 3x3 matrix into 4x4 matrix ####
+                T = np.insert(T, 2, [0, 0, 0], axis=1)
+                T = np.insert(T, 2, [0, 0, 1, 0], axis=0)
 
-		#DRAWING FUNCTION FOR CHECKING ICP DONE WELL : Source blue, Dest green, Dest after ICP red
-		
-        #dstTrans = np.dot(T, dstPoint)
-        #plt.scatter(dstPoint[0], dstPoint[1], c='g', marker='o',s=0.2, label="Dest")
-        #plt.scatter(srcPoint[0], srcPoint[1], c='b', marker='o',s=0.2, label="Source")
-        #plt.scatter(dstTrans[0], dstTrans[1], c='r', marker='o',s=0.2, label="ICP")
-        #plt.legend(loc='upper right', markerscale=3)
-        #plt.show()
-		
-        if np.mean(distances) < 0.05:	# ADD CONDITION OF MATCHING SUCCESS (ex: mean of distances less then 0.05 [m])
-            optimizer.add_edge([src, dst], g2o.Isometry3d(T),
-                           information=np.eye(6))
-            optimizer.optimize()
+                #DRAWING FUNCTION FOR CHECKING ICP DONE WELL : Source blue, Dest green, Dest after ICP red
+                
+                #dstTrans = np.dot(T, dstPoint)
+                #plt.scatter(dstPoint[0], dstPoint[1], c='g', marker='o',s=0.2, label="Dest")
+                #plt.scatter(srcPoint[0], srcPoint[1], c='b', marker='o',s=0.2, label="Source")
+                #plt.scatter(dstTrans[0], dstTrans[1], c='r', marker='o',s=0.2, label="ICP")
+                #plt.legend(loc='upper right', markerscale=3)
+                #plt.show()
+                
+                if np.mean(distances) < 0.05:	# ADD CONDITION OF MATCHING SUCCESS (ex: mean of distances less then 0.05 [m])
+                    optimizer.add_edge([src, dst], g2o.Isometry3d(T),
+                                information=information_matrix)
+                    optimizer.optimize()
 
     
 
@@ -222,7 +237,7 @@ def main():
     plt.show()
     
     optimizer.save_g2o('afterSLAM.g2o')
-    plot_g2o(optimizer)
+    plot_g2o(optimizer,showedge=True)
 
 
 
