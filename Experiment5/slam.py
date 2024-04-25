@@ -6,26 +6,27 @@ import icp
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
     
-def plot_g2o(optimizer, showedge = False):
+def plot_g2o(optimizer, showedge = False): 
+    #Get x and y positions
     poses = []
-    for vertex_id, vertex in optimizer.vertices().items():
+    for _, vertex in optimizer.vertices().items():
         pose = vertex.estimate()
         translation = pose.translation()
-        poses.append((translation[0], translation[1]))  # Get x and y positions
-
+        poses.append((translation[0], translation[1])) 
     x, y = zip(*poses)
 
-    # Plotting
+    #Plot
     plt.figure(figsize=(8, 8))
-    plt.quiver(x[:-1], y[:-1], np.diff(x), np.diff(y), scale_units='xy', angles='xy', scale=1, color='blue')  
-    plt.plot(x, y, '-', markersize=5)  # 'bo-' for blue circle markers connected by lines
+    plt.quiver(x[:-1], y[:-1], np.diff(x), np.diff(y), scale_units='xy', angles='xy', scale=1, color='blue')  #arrows
+    plt.plot(x, y, '-b', markersize=5) #line
     
     if showedge:
         for edge in optimizer.edges():
             v1, v2 = edge.vertices()
             x = np.array([v1.estimate().translation()[0], v2.estimate().translation()[0]])
             y = np.array([v1.estimate().translation()[1], v2.estimate().translation()[1]])
-            plt.plot(x, y, '-k', alpha=0.5)
+            plt.plot(x, y, '-k', alpha=0.5) #edge lines
+            
     plt.xlabel('X position')
     plt.ylabel('Y position')
     plt.title('Graph Optimization Results with g2opy')
@@ -35,10 +36,12 @@ def plot_g2o(optimizer, showedge = False):
 
 def calculate_information_matrix(dist_diff, yaw_diff):
     information_matrix = np.eye(6)
+    # Update x, y covariance based on distance difference
+    information_matrix[0, 0] = dist_diff  
+    information_matrix[1, 1] = dist_diff
     
-    information_matrix[0, 0] = dist_diff  # Update x covariance based on distance difference
-    information_matrix[1, 1] = dist_diff  # Update y covariance based on distance difference
-    information_matrix[5, 5] = yaw_diff   # Update yaw covariance based on yaw difference
+    # Update yaw covariance based on yaw difference
+    information_matrix[5, 5] = yaw_diff  
     
     return information_matrix
 
