@@ -54,10 +54,10 @@
 
 Matplotlib
 
-<img src="./Figure_1-1.png" width="300px" height="250px"></img>
-<img src="./Figure_1-2.png" width="300px" height="250px"></img>
+<img src="./image/Figure_1-1.png" width="300px" height="250px"></img>
+<img src="./image/Figure_1-2.png" width="300px" height="250px"></img>
 
 G2O viewer
 
-<img src="./Figure_2-1.png" width="300px" height="250px"></img>
-<img src="./Figure_2-2.png" width="300px" height="250px"></img>
+<img src="./image/Figure_2-1.png" width="300px" height="250px"></img>
+<img src="./image/Figure_2-2.png" width="300px" height="250px"></img>
