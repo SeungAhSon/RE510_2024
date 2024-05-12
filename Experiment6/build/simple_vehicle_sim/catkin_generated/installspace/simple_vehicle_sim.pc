@@ -1,0 +1,8 @@
+prefix=/home/sa/RE510_2024/Experiment6/install
+
+Name: simple_vehicle_sim
+Description: Description of simple_vehicle_sim
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lsimple_vehicle_sim
+Requires: geometry_msgs nav_msgs roscpp rospy std_msgs
