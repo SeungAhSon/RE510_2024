@@ -1,0 +1,1 @@
+/home/sa/RE510_2024/Experiment6/catkin_ws/devel/.private/pykdl_utils/share/pykdl_utils/cmake/pykdl_utilsConfig.cmake

@@ -1,0 +1,8 @@
+prefix=/home/sa/RE510_2024/Experiment6/catkin_ws/install
+
+Name: pykdl_utils
+Description: Description of pykdl_utils
+Version: 0.1.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

@@ -1,2 +1,0 @@
-simple_vehicle_sim:waypoint_follower
--DCATKIN_DEVEL_PREFIX=/home/sa/RE510_2024/Experiment6/devel -DCMAKE_INSTALL_PREFIX=/home/sa/RE510_2024/Experiment6/install -G Unix Makefiles
