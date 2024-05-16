@@ -38,9 +38,17 @@ def global2local(ego_x, ego_y, ego_yaw, x_list, y_list):
         - ego_x, ego_y, ego_yaw        : ego vehicle's current pose.
         - output_x_list, output_y_list : transformed local coordinate trajectory.
     """
-    output_x_list = x_list
-    output_y_list = y_list
-
+    output_x_list = []
+    output_y_list = []
+    cos_yaw = np.cos(ego_yaw)
+    sin_yaw = np.sin(ego_yaw)
+    for x, y in zip(x_list, y_list):
+        dx = x - ego_x
+        dy = y - ego_y
+        x_local = cos_yaw * dx + sin_yaw * dy
+        y_local = -sin_yaw * dx + cos_yaw * dy
+        output_x_list.append(x_local)
+        output_y_list.append(y_local)
     return output_x_list, output_y_list
 
 # Find nearest point
@@ -52,9 +60,9 @@ def find_nearest_point(ego_x, ego_y, x_list, y_list):
         - Use np.argmin for finding the index whose value is minimum.
     """
 
-    near_ind = -1
-    near_dist = 0
-
+    distances = [calc_dist(ego_x, ego_y, x, y) for x, y in zip(x_list, y_list)]
+    near_ind = np.argmin(distances)
+    near_dist = distances[near_ind]
     return near_dist, near_ind
 
 # Calculate Error
@@ -84,13 +92,23 @@ def calc_error(ego_x, ego_y, ego_yaw, x_list, y_list, wpt_look_ahead=0):
 
     # 3. Set lookahead waypoint (index increment of waypoint trajectory)
     # lookahead_wpt_ind = near_ind + wpt_look_ahead
-    lookahead_wpt_ind = -1
+    lookahead_wpt_ind = (near_ind + wpt_look_ahead) % len(x_list)
 
     # 4. Calculate errors
-    error_yaw = 0
-    error_yaw = normalize_angle(error_yaw) # Normalize angle to [-pi, +pi]
-    error_y   = 0
-    
+    error_y = local_y_list[lookahead_wpt_ind]
+
+    # Yaw error (error_yaw): Calculate using atan2 between current and lookahead waypoint
+    if lookahead_wpt_ind == 0:
+        # When one cycle is completed
+        dx = local_x_list[-1] - local_x_list[0] 
+        dy = local_y_list[-1] - local_y_list[0]
+    else:
+        dx = local_x_list[lookahead_wpt_ind] - local_x_list[lookahead_wpt_ind - 1]
+        dy = local_y_list[lookahead_wpt_ind] - local_y_list[lookahead_wpt_ind - 1]
+
+    error_yaw = math.atan2(dy, dx)
+    error_yaw = normalize_angle(error_yaw - ego_yaw)  # Normalize angle [-pi, +pi]
+
     return error_y, error_yaw
 
 class WaypointFollower():
@@ -109,7 +127,7 @@ class WaypointFollower():
         self.ego_yaw = 0
         self.ego_vx  = 0
 
-        self.wpt_look_ahead = 0   # [index]
+        self.wpt_look_ahead = 3   # [index]
 
         # Pub/Sub
         self.pub_command = rospy.Publisher('control', AckermannDriveStamped, queue_size=5)
@@ -135,10 +153,13 @@ class WaypointFollower():
         Implement a steering controller (PID controller or Pure pursuit or Stanley method).
         You can use not only error_y, error_yaw, but also other input arguments for this controller if you want.
         """
-        steer = 0
+        Kp_lat = 0.08#0.08
+        Kp_yaw = 0.008#0.008
+        steer = Kp_lat * error_y + Kp_yaw * error_yaw
 
         # Control limit
         steer = np.clip(steer, -self.MAX_STEER, self.MAX_STEER)
+
 
         return steer
 
@@ -148,7 +169,8 @@ class WaypointFollower():
         Implement a speed controller (PID controller).
         You can use not only error_v, but also other input arguments for this controller if you want.
         """
-        throttle = 0
+        Kp_speed = 0.08
+        throttle = Kp_speed * error_v
                 
         return throttle
 
