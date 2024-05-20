@@ -95,19 +95,12 @@ def calc_error(ego_x, ego_y, ego_yaw, x_list, y_list, wpt_look_ahead=0):
     lookahead_wpt_ind = (near_ind + wpt_look_ahead) % len(x_list)
 
     # 4. Calculate errors
+    error_x = local_x_list[lookahead_wpt_ind]
     error_y = local_y_list[lookahead_wpt_ind]
 
     # Yaw error (error_yaw): Calculate using atan2 between current and lookahead waypoint
-    if lookahead_wpt_ind == 0:
-        # When one cycle is completed
-        dx = local_x_list[-1] - local_x_list[0] 
-        dy = local_y_list[-1] - local_y_list[0]
-    else:
-        dx = local_x_list[lookahead_wpt_ind] - local_x_list[lookahead_wpt_ind - 1]
-        dy = local_y_list[lookahead_wpt_ind] - local_y_list[lookahead_wpt_ind - 1]
-
-    error_yaw = math.atan2(dy, dx)
-    error_yaw = normalize_angle(error_yaw - ego_yaw)  # Normalize angle [-pi, +pi]
+    error_yaw = math.atan2(error_y, error_x)
+    error_yaw = normalize_angle(error_yaw)  # Normalize angle [-pi, +pi]
 
     return error_y, error_yaw
 
@@ -128,6 +121,16 @@ class WaypointFollower():
         self.ego_vx  = 0
 
         self.wpt_look_ahead = 5   # [index]
+        
+        #steer control - PID
+        self.error_integral_lat = 0
+        self.error_integral_yaw = 0
+        self.error_integral_speed = 0
+        self.prev_error_lat = 0
+        self.prev_error_yaw = 0
+        
+        #speed control - PID
+        self.prev_error_speed = 0
 
         # Pub/Sub
         self.pub_command = rospy.Publisher('control', AckermannDriveStamped, queue_size=5)
@@ -147,34 +150,80 @@ class WaypointFollower():
         _, _, self.ego_yaw = euler_from_quaternion(q_list)
 
     # Controller
-    def steer_control(self, error_y, error_yaw, dt=1):
+    def steer_control(self, error_y, error_yaw, steer_type='PID', lookahead=5, dt=0.01):
         """
         TODO
         Implement a steering controller (PID controller or Pure pursuit or Stanley method).
         You can use not only error_y, error_yaw, but also other input arguments for this controller if you want.
         """
-        Kp_lat = 0.1
-        Kp_yaw = 0.01
-        steer = Kp_lat * error_y + Kp_yaw * error_yaw
+        if steer_type == 'PID':
+            Kp_lat = 0.1
+            Kp_yaw = 0.01
+            Ki_lat = 0.001
+            Ki_yaw = 0.003
+            Kd_lat = 0.001
+            Kd_yaw = 0.003
+
+            # Proportional term
+            error_p_lat = Kp_lat * error_y
+            error_p_yaw = Kp_yaw * error_yaw
+            
+            # Integral term
+            self.error_integral_lat += error_y * dt
+            error_i_lat = Ki_lat * self.error_integral_lat
+            self.error_integral_yaw += error_yaw * dt
+            error_i_yaw = Ki_yaw * self.error_integral_yaw
+
+            # Derivative term
+            error_d_lat = Kd_lat * ((error_y - self.prev_error_lat) / dt)
+            self.prev_error_lat = error_y
+            error_d_yaw = Kd_yaw * ((error_yaw - self.prev_error_yaw) / dt)
+            self.prev_error_yaw = error_yaw
+
+            # Total control signal
+            steer = error_p_yaw + error_p_lat + error_i_yaw  + error_i_lat + error_d_yaw  + error_d_lat
+            
+        elif steer_type == 'Stanley':
+            k_e = 0.01 
+            vel = self.ego_vx
+            if vel != 0:
+                steer = 0.4 * error_yaw + math.atan(k_e * error_y/vel)
+                steer = normalize_angle(steer)
+            else :
+                steer = 0
+            
         
+        # Control limit
+        steer = np.clip(steer, -self.MAX_STEER, self.MAX_STEER)
+        #steer = steer * self.MAX_STEER
+
         return steer
 
 
-    def speed_control(self, error_v, dt=1):
+    def speed_control(self, error_v, dt=0.01):
         """
         TODO
         Implement a speed controller (PID controller).
         You can use not only error_v, but also other input arguments for this controller if you want.
         """
         Kp_speed = 0.025
-        throttle = Kp_speed * error_v
+        Ki_speed = 0.001
+        Kd_speed = 0.01
         
-        #Kp_speed = 0.01
-        #Ki_speed = 0.001
-        #Kd_speed = 0.01
+        # Proportional term
+        error_p_speed = Kp_speed * error_v
         
+        # Integral term
+        self.error_integral_speed += error_v * dt
+        error_i_speed = Ki_speed * self.error_integral_speed
         
-        throttle = np.clip(throttle, -0.1, 0.1)        
+        # Derivative term
+        error_d_speed = Kd_speed * ((error_v - self.prev_error_speed) / dt)
+        self.prev_error_speed = error_v
+        
+        throttle = error_p_speed + error_i_speed + error_d_speed
+        
+        throttle = np.clip(throttle, -0.3, 0.3)        
         return throttle
 
     def publish_command(self, steer, accel):
@@ -223,7 +272,8 @@ def main():
         error_v_data.append(abs(error_v))
 
         # Control
-        steer_cmd = wpt_control.steer_control(error_y, error_yaw)
+        steer_cmd = wpt_control.steer_control(error_y, error_yaw, dt=0.01, lookahead=wpt_control.wpt_look_ahead, \
+            steer_type='Stanley') # PID, Stanley
         throttle_cmd = wpt_control.speed_control(error_v)
 
         # Publish command
