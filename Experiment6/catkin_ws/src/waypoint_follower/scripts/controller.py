@@ -127,7 +127,7 @@ class WaypointFollower():
         self.ego_yaw = 0
         self.ego_vx  = 0
 
-        self.wpt_look_ahead = 3   # [index]
+        self.wpt_look_ahead = 5   # [index]
 
         # Pub/Sub
         self.pub_command = rospy.Publisher('control', AckermannDriveStamped, queue_size=5)
@@ -147,31 +147,34 @@ class WaypointFollower():
         _, _, self.ego_yaw = euler_from_quaternion(q_list)
 
     # Controller
-    def steer_control(self, error_y, error_yaw):
+    def steer_control(self, error_y, error_yaw, dt=1):
         """
         TODO
         Implement a steering controller (PID controller or Pure pursuit or Stanley method).
         You can use not only error_y, error_yaw, but also other input arguments for this controller if you want.
         """
-        Kp_lat = 0.08#0.08
-        Kp_yaw = 0.008#0.008
+        Kp_lat = 0.1
+        Kp_yaw = 0.01
         steer = Kp_lat * error_y + Kp_yaw * error_yaw
-
-        # Control limit
-        steer = np.clip(steer, -self.MAX_STEER, self.MAX_STEER)
-
-
+        
         return steer
 
-    def speed_control(self, error_v):
+
+    def speed_control(self, error_v, dt=1):
         """
         TODO
         Implement a speed controller (PID controller).
         You can use not only error_v, but also other input arguments for this controller if you want.
         """
-        Kp_speed = 0.08
+        Kp_speed = 0.025
         throttle = Kp_speed * error_v
-                
+        
+        #Kp_speed = 0.01
+        #Ki_speed = 0.001
+        #Kd_speed = 0.01
+        
+        
+        throttle = np.clip(throttle, -0.1, 0.1)        
         return throttle
 
     def publish_command(self, steer, accel):
@@ -215,7 +218,7 @@ def main():
         error_v = wpt_control.target_speed - ego_vx
 
         # Log errors (errors w.r.t. the closest point)
-        error_y_log, _ = calc_error(ego_x, ego_y, ego_yaw, wpts_x, wpts_y, wpt_look_ahead=0)
+        error_y_log, _ = calc_error(ego_x, ego_y, ego_yaw, wpts_x, wpts_y, wpt_look_ahead=wpt_control.wpt_look_ahead)
         error_y_data.append(abs(error_y_log))
         error_v_data.append(abs(error_v))
 
